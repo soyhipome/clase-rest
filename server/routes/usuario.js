@@ -1,20 +1,19 @@
 const express = require('express')
 const app = express()
 const Usuario = require('../models/usuario')
+const { verificaToken, verificaAdminRole } = require('../middlewares/autenticacion')
 
 const _ = require('underscore')
 const bcrypt = require('bcrypt')
-const usuario = require('../models/usuario')
 
-app.get('/usuario', function (req, res) {
+app.get('/usuario', verificaToken , (req, res) => {
 
-    // { estado: true}
 
-    let desde = req.query.desde || 10
-    desde = Number(desde)
+    // let desde = req.query.desde || 10
+    // desde = Number(desde)
 
-    let limite = req.query.desde || 5
-    limite = Number(limite)
+    // let limite = req.query.desde || 5
+    // limite = Number(limite)
 
     Usuario.find({estado: true}, 'nombre email role estado google img')
         .skip(desde)
@@ -46,7 +45,7 @@ app.get('/usuario', function (req, res) {
 
 })
   
-  app.post('/usuario', function (req, res) {
+  app.post('/usuario', [verificaToken, verificaAdminRole], (req, res) => {
       
       let body = req.body
 
@@ -78,28 +77,10 @@ app.get('/usuario', function (req, res) {
                       ok: true,
                       usuario: usuarioDB
                   })
-          })
-    //   if ( body.nombre !== undefined ) 
-    //   {
-    //       res.json(
-    //       {
-    //           persona: body
-    //       }
-    //       )    
-    //   } 
-    //   else 
-    //   {
-    //       res.status(400).json(
-    //           {
-    //               ok: false,
-    //               mensaje: 'El nombre es necesario'
-    //           }
-    //       )
-    //   }
-  
+          })  
   })
   
-  app.put('/usuario/:id', function (req, res) {
+  app.put('/usuario/:id', [verificaToken, verificaAdminRole], (req, res) => {
       
     let id = req.params.id
     let body = _.pick(req.body, [ 'nombre', 'email', 'img', 'role', 'estado'])
@@ -127,7 +108,7 @@ app.get('/usuario', function (req, res) {
 
   })
    
-  app.delete('/usuario/:id', function (req, res) {
+  app.delete('/usuario/:id', [verificaToken, verificaAdminRole], (req, res) => {
 
     let id = req.params.id;
     let cambiaEstado = {
@@ -160,4 +141,4 @@ app.get('/usuario', function (req, res) {
     })
 })
 
-  module.exports = app;
+  module.exports = app
